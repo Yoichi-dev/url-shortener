@@ -55,7 +55,7 @@ router.post('/shorten', asyncWrapper(async (req: Request, res: Response) => {
   }
 }));
 
-router.get('/s/:code', async (req: Request, res: Response) => {
+router.post('/s/:code', async (req: Request, res: Response) => {
   const shortCode: string = req.params.code;
 
   try {
@@ -76,7 +76,7 @@ router.get('/s/:code', async (req: Request, res: Response) => {
   }
 });
 
-router.get('/admin', async (req: Request, res: Response) => {
+router.post('/admin', async (req: Request, res: Response) => {
   try {
     const result = await pool.query(
       sqlconstants.admin.select
