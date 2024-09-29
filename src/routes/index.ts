@@ -15,7 +15,7 @@ const asyncWrapper = (fn: (req: Request, res: Response, next: NextFunction) => P
   }
 };
 
-router.get('/', (req: Request, res: Response) => {
+router.post('/', (req: Request, res: Response) => {
   res.json({ title: 'hello world!' });
 });
 
