@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import path from 'path';
 import dotenv from 'dotenv';
 import type { Request, Response, NextFunction } from 'express';
 import pool from '../lib/db/pool';
@@ -14,6 +15,10 @@ const asyncWrapper = (fn: (req: Request, res: Response, next: NextFunction) => P
     return fn(req, res, next).catch(next);
   }
 };
+
+router.get('/', (req: Request, res: Response) => {
+  res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
+});
 
 router.post('/', (req: Request, res: Response) => {
   res.json({ title: 'hello world!' });
@@ -46,7 +51,7 @@ router.post('/shorten', asyncWrapper(async (req: Request, res: Response) => {
         [originalUrl, shortCode]
       );
 
-      const shortUrl: string = `${process.env.HOST_IP}/${shortCode}`;
+      const shortUrl: string = `${process.env.HOST_IP}/s/${shortCode}`;
       res.json({ shortUrl });
     }
   } catch (err) {
@@ -54,6 +59,27 @@ router.post('/shorten', asyncWrapper(async (req: Request, res: Response) => {
     res.status(500).json({ error: 'サーバーエラー' });
   }
 }));
+
+router.get('/s/:code', async (req: Request, res: Response) => {
+  const shortCode: string = req.params.code;
+
+  try {
+    const result = await pool.query(
+      sqlconstants.geturl.select,
+      [shortCode]
+    );
+
+    if (result.rows.length > 0) {
+      const originalUrl: string = result.rows[0].original_url;
+      res.redirect(originalUrl);
+    } else {
+      res.status(404).json({ error: 'URLが見つかりません' });
+    }
+  } catch (err) {
+    AppLogger.error('データベースエラー:', err);
+    res.status(500).json({ error: 'サーバーエラーが発生しました' });
+  }
+});
 
 router.post('/s/:code', async (req: Request, res: Response) => {
   const shortCode: string = req.params.code;
@@ -76,6 +102,10 @@ router.post('/s/:code', async (req: Request, res: Response) => {
   }
 });
 
+router.get('/admin', (req: Request, res: Response) => {
+  res.sendFile(path.join(__dirname, '..', 'public', 'admin.html'));
+});
+
 router.post('/admin', async (req: Request, res: Response) => {
   try {
     const result = await pool.query(
@@ -85,7 +115,7 @@ router.post('/admin', async (req: Request, res: Response) => {
     const urls = result.rows.map((row) => ({
       id: row.id,
       originalUrl: row.original_url,
-      shortUrl: `${process.env.HOST_IP}/${row.short_code}`,
+      shortUrl: `${process.env.HOST_IP}/s/${row.short_code}`,
       createdAt: row.created_at,
     }));
 
