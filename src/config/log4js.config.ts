@@ -1,7 +1,10 @@
 import appRoot from 'app-root-path';
 import path from 'path';
+import dotenv from 'dotenv';
 
-const LOG_ROOT_DIR = process.env.LOG_ROOT_DIR || appRoot.resolve('logs');
+dotenv.config();
+
+const LOG_ROOT_DIR: string = process.env.LOG_ROOT_DIR || appRoot.resolve('logs');
 
 export default {
   appenders: {
