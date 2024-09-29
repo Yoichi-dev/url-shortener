@@ -6,6 +6,9 @@ const sqlconstants = {
   },
   geturl: {
     select: 'SELECT original_url FROM urls WHERE short_code = $1',
+  },
+  admin: {
+    select: 'SELECT id, original_url, short_code, created_at FROM urls ORDER BY created_at DESC',
   }
 };
 

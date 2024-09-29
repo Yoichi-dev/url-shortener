@@ -76,6 +76,26 @@ router.get('/s/:code', async (req: Request, res: Response) => {
   }
 });
 
+router.get('/admin', async (req: Request, res: Response) => {
+  try {
+    const result = await pool.query(
+      sqlconstants.admin.select
+    );
+
+    const urls = result.rows.map((row) => ({
+      id: row.id,
+      originalUrl: row.original_url,
+      shortUrl: `${process.env.HOST_IP}/${row.short_code}`,
+      createdAt: row.created_at,
+    }));
+
+    res.json(urls);
+  } catch (err) {
+    AppLogger.error('データベースエラー:', err);
+    res.status(500).json({ error: 'サーバーエラーが発生しました' });
+  }
+});
+
 // 短縮コード生成関数
 function generateShortCode(): string {
   return Math.random().toString(36).substring(2, 8);
